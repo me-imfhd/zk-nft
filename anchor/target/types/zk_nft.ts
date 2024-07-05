@@ -30,12 +30,6 @@ export type ZkNft = {
         {
           "name": "maxSize",
           "type": "u64"
-        },
-        {
-          "name": "groupDelegate",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },
@@ -367,12 +361,6 @@ export type ZkNft = {
           {
             "name": "authority",
             "type": "publicKey"
-          },
-          {
-            "name": "delegate",
-            "type": {
-              "option": "publicKey"
-            }
           }
         ]
       }
@@ -733,12 +721,6 @@ export const IDL: ZkNft = {
         {
           "name": "maxSize",
           "type": "u64"
-        },
-        {
-          "name": "groupDelegate",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },
@@ -1070,12 +1052,6 @@ export const IDL: ZkNft = {
           {
             "name": "authority",
             "type": "publicKey"
-          },
-          {
-            "name": "delegate",
-            "type": {
-              "option": "publicKey"
-            }
           }
         ]
       }

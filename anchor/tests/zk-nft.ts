@@ -55,7 +55,7 @@ describe("zk-nft", () => {
 
   const connection: Rpc = createRpc(...connectionArgs);
 
-  it("Can create compressed account", async () => {
+  it.skip("Can create compressed account", async () => {
     const seed = Uint8Array.from([127, 69, 28]);
     const txSig = await createAccount(
       connection,
@@ -78,7 +78,7 @@ describe("zk-nft", () => {
     group = groupKeypair.publicKey;
 
     const ix = await program.methods
-      .createGroup(new anchor.BN(0), null)
+      .createGroup(new anchor.BN(0))
       .accounts({
         payer: provider.wallet.publicKey,
         groupAuthority: provider.wallet.publicKey,

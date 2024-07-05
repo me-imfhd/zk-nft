@@ -5,13 +5,13 @@ use crate::state::Group;
 pub fn create_group<'info>(
     ctx: Context<CreateGroup<'info>>,
     max_size: u64,
-    group_delegate: Option<Pubkey>,
+    // group_delegate: Option<Pubkey>,
 ) -> Result<()> {
     let group = &mut ctx.accounts.group;
     group.size = 0;
     group.max_size = max_size;
     group.authority = ctx.accounts.group_authority.key();
-    group.delegate = group_delegate;
+    // group.delegate = group_delegate;
 
     Ok(())
 }

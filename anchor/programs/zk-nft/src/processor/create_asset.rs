@@ -42,13 +42,16 @@ pub fn create_asset<'info>(
 
         // requires correct group authority or delegate to be signer
         require!(
-            group.authority == group_authority_or_delegate
-                || group.delegate.unwrap() == group_authority_or_delegate,
+            group.authority == group_authority_or_delegate,
+            // || group.delegate.unwrap() == group_authority_or_delegate,
             ZkNftError::GroupAuthorityOrDelegateMismatch
         );
 
         // requires asset authority to be the same as the group authority
-        require_keys_eq!(group.authority.key(), ctx.accounts.asset_authority.clone().unwrap().key()); 
+        require_keys_eq!(
+            group.authority.key(),
+            ctx.accounts.asset_authority.clone().unwrap().key()
+        );
 
         if group.max_size > 0 && group.size >= group.max_size {
             return Err(ZkNftError::GroupMaxSizeExceeded.into());

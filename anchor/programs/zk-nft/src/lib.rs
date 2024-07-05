@@ -18,9 +18,9 @@ pub mod zk_nft {
     pub fn create_group<'info>(
         ctx: Context<CreateGroup<'info>>,
         max_size: u64,
-        group_delegate: Option<Pubkey>,
+        // group_delegate: Option<Pubkey>,
     ) -> Result<()> {
-        processor::create_group(ctx, max_size, group_delegate)
+        processor::create_group(ctx, max_size /* , group_delegate*/)
     }
 
     pub fn create_asset<'info>(

@@ -30,12 +30,6 @@
         {
           "name": "maxSize",
           "type": "u64"
-        },
-        {
-          "name": "groupDelegate",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },
@@ -367,12 +361,6 @@
           {
             "name": "authority",
             "type": "publicKey"
-          },
-          {
-            "name": "delegate",
-            "type": {
-              "option": "publicKey"
-            }
           }
         ]
       }
