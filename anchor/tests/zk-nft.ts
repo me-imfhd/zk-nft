@@ -55,7 +55,7 @@ describe("zk-nft", () => {
 
   const connection: Rpc = createRpc(...connectionArgs);
 
-  it.only("Can create compressed account", async () => {
+  it("Can create compressed account", async () => {
     const seed = Uint8Array.from([127, 69, 28]);
     const txSig = await createAccount(
       connection,
@@ -278,7 +278,7 @@ describe("zk-nft", () => {
     expect(groupData.size.toNumber()).to.equal(1);
   });
 
-  it.skip("Can transfer asset", async () => {
+  it("Can transfer asset", async () => {
     const addressTree = defaultTestStateTreeAccounts().addressTree;
     const baseDataAddress = await deriveAddress(baseDataSeed, addressTree);
     const unsafeRes = await rpcRequest(
