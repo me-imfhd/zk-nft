@@ -236,9 +236,7 @@ describe("zk-nft", () => {
       .accounts({
         payer: provider.wallet.publicKey,
         assetAuthority: provider.wallet.publicKey,
-        eventAuthority: provider.wallet.publicKey,
         groupAuthorityOrDelegate: provider.wallet.publicKey,
-        program: program.programId,
         recipient,
         group,
         cpiAuthorityPda: PublicKey.findProgramAddressSync(
