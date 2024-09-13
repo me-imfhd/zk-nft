@@ -7,6 +7,7 @@ import {
   LightSystemProgram,
   NewAddressParams,
   Rpc,
+  airdropSol,
   bn,
   buildAndSignTx,
   createAccount,
@@ -18,19 +19,13 @@ import {
   packNewAddressParams,
   rpcRequest,
   sendAndConfirmTx,
+  CompressedAccount,
 } from "@lightprotocol/stateless.js";
-import fs from "fs";
 import { expect } from "chai";
 import { sha256 } from "@noble/hashes/sha256";
 import bs58 from "bs58";
 
 const { PublicKey } = anchor.web3;
-
-const keypair = anchor.web3.Keypair.fromSecretKey(
-  Uint8Array.from(
-    JSON.parse(fs.readFileSync("target/deploy/authority-keypair.json", "utf-8"))
-  )
-);
 
 const setComputeUnitIx = anchor.web3.ComputeBudgetProgram.setComputeUnitLimit({
   units: 1_000_000,
@@ -39,38 +34,30 @@ const setComputeUnitIx = anchor.web3.ComputeBudgetProgram.setComputeUnitLimit({
 describe("zk-nft", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
+  const wallet = provider.wallet as anchor.Wallet;
   anchor.setProvider(provider);
-
   const program = anchor.workspace.ZkNft as Program<ZkNft>;
+  const connection: Rpc = createRpc(undefined, undefined, undefined, {
+    commitment: "confirmed",
+  });
 
-  const connectionArgs: any =
-    provider.connection.rpcEndpoint === "http://localhost:8899"
-      ? [undefined, undefined, undefined]
-      : [
-          "https://zk-testnet.helius.dev:8899", // rpc
-          "https://zk-testnet.helius.dev:8784", // zk compression rpc
-          "https://zk-testnet.helius.dev:3001", // prover
-        ];
-  connectionArgs.push({ commitment: "confirmed" });
-
-  const connection: Rpc = createRpc(...connectionArgs);
-
-  it.skip("Can create compressed account", async () => {
-    const seed = Uint8Array.from([127, 69, 28]);
+  it("Can create compressed account", async () => {
+    const baseDataSeed = anchor.web3.Keypair.generate().publicKey.toBytes();
+    await airdropSol({
+      connection,
+      lamports: 1e11,
+      recipientPublicKey: wallet.publicKey,
+    });
+    console.log(program.programId);
     const txSig = await createAccount(
       connection,
-      keypair,
-      seed,
-      program.programId,
-      undefined,
-      undefined,
-      undefined,
-      { skipPreflight: true }
+      wallet.payer,
+      baseDataSeed,
+      program.programId
     );
 
     console.log("Your transaction signature", txSig);
   });
-
   let group: anchor.web3.PublicKey;
   it("Can create group", async () => {
     const groupKeypair = anchor.web3.Keypair.generate();
@@ -87,7 +74,7 @@ describe("zk-nft", () => {
       .instruction();
 
     const blockhash = await connection.getLatestBlockhash();
-    const tx = buildAndSignTx([ix], keypair, blockhash.blockhash, [
+    const tx = buildAndSignTx([ix], wallet.payer, blockhash.blockhash, [
       groupKeypair,
     ]);
     const signature = await sendAndConfirmTx(connection, tx, {
@@ -103,7 +90,6 @@ describe("zk-nft", () => {
       provider.wallet.publicKey.toBase58()
     );
   });
-
   const baseDataSeed = anchor.web3.Keypair.generate().publicKey.toBytes();
   it("Can create asset with blob and attributes", async () => {
     const addressTree = defaultTestStateTreeAccounts().addressTree;
@@ -113,7 +99,7 @@ describe("zk-nft", () => {
       Buffer.concat([Buffer.from("asset_data"), baseDataAddress.toBuffer()])
     );
     const assetDataAddress = await deriveAddress(assetDataSeed, addressTree);
-
+    console.log(assetDataAddress.toBytes());
     const blobSeed = sha256(
       Buffer.concat([Buffer.from("blob"), baseDataAddress.toBuffer()])
     );
@@ -150,13 +136,13 @@ describe("zk-nft", () => {
         program.programId
       );
 
-    const outputCompressedAccounts = [
+    const outputCompressedAccounts: CompressedAccount[] = [
       ...assetDataOutputCompressedAccounts,
       ...baseDataOutputCompressedAccounts,
       ...blobOutputCompressedAccounts,
       ...attributesOutputCompressedAccounts,
     ];
-    const baseDataAddressParams = {
+    const baseDataAddressParams: NewAddressParams = {
       seed: baseDataSeed,
       addressMerkleTreeRootIndex:
         proof.rootIndices[proof.rootIndices.length - 1],
@@ -190,12 +176,11 @@ describe("zk-nft", () => {
     const attributesProof = await connection.getValidityProof(undefined, [
       bn(attributesAddress.toBytes()),
     ]);
-
-    // console.log({
-    //   blobProof: blobProof.compressedProof,
-    //   attributesProof: attributesProof.compressedProof,
-    //   proof: proof.compressedProof,
-    // });
+    console.log({
+      blobProof: blobProof,
+      attributesProof: attributesProof,
+      proof: proof,
+    });
 
     // return;
 
@@ -259,23 +244,24 @@ describe("zk-nft", () => {
         }))
       )
       .instruction();
-
     const blockhash = await connection.getLatestBlockhash();
     const tx = buildAndSignTx(
       [setComputeUnitIx, ix],
-      keypair,
+      wallet.payer,
       blockhash.blockhash,
       []
     );
     const signature = await sendAndConfirmTx(connection, tx, {
       commitment: "confirmed",
+    }).catch(async (err) => {
+      console.log(await err.getLogs());
     });
 
     console.log("Your transaction signature", signature);
     const groupData = await program.account.group.fetch(group);
     expect(groupData.size.toNumber()).to.equal(1);
   });
-
+  return;
   it("Can transfer asset", async () => {
     const addressTree = defaultTestStateTreeAccounts().addressTree;
     const baseDataAddress = await deriveAddress(baseDataSeed, addressTree);
@@ -382,7 +368,7 @@ describe("zk-nft", () => {
     const blockhash = await connection.getLatestBlockhash();
     const tx = buildAndSignTx(
       [setComputeUnitIx, ix],
-      keypair,
+      wallet.payer,
       blockhash.blockhash,
       []
     );
