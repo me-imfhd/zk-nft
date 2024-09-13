@@ -2,18 +2,15 @@ use crate::errors::ZkNftError;
 use crate::state::BaseData;
 use crate::{constants::CPI_AUTHORITY_SEED, state::State};
 use crate::{DelegateRole, OwnerUpdatedEvent, PackedInputCompressedPda};
-use account_compression::{program::AccountCompression, RegisteredProgram};
 use anchor_lang::{prelude::*, Discriminator};
 use light_hasher::{DataHasher, Poseidon};
-use light_sdk::traits::*;
+use light_sdk::light_system_accounts;
 use light_sdk::verify::verify;
-use light_sdk::{light_accounts, LightTraits};
+use light_sdk::LightTraits;
 use light_system_program::sdk::compressed_account::PackedCompressedAccountWithMerkleContext;
 use light_system_program::InstructionDataInvokeCpi;
 use light_system_program::{
     invoke::processor::CompressedProof,
-    invoke_cpi::account::CpiContextAccount,
-    program::LightSystemProgram,
     sdk::compressed_account::{CompressedAccount, CompressedAccountData},
     OutputCompressedAccountWithPackedContext,
 };
@@ -69,13 +66,9 @@ pub fn transfer<'info>(
         output_compressed_accounts: vec![new_state],
         compress_or_decompress_lamports: None,
         is_compress: false,
-        signer_seeds: signer_seeds
-            .iter()
-            .map(|x| x.to_vec())
-            .collect::<Vec<Vec<u8>>>(),
         cpi_context: None,
     };
-    verify(ctx, &inputs_struct, &[&signer_seeds])?;
+    verify(&ctx, &inputs_struct, &[&signer_seeds])?;
 
     Ok(())
 }
@@ -106,6 +99,7 @@ fn get_old_and_new_base_data_compressed_pda<'info>(
         },
         merkle_context: base_data_input.merkle_context,
         root_index: base_data_input.root_index,
+        read_only: true,
     };
 
     // get new base data
@@ -129,7 +123,7 @@ fn get_old_and_new_base_data_compressed_pda<'info>(
     Ok((old_compressed_account_with_context, new_compressed_account))
 }
 
-#[light_accounts]
+#[light_system_accounts]
 #[event_cpi]
 #[derive(Accounts, LightTraits)]
 pub struct Transfer<'info> {

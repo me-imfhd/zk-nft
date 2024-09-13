@@ -5,17 +5,15 @@ use crate::state::{AssetData, BaseData, DelegateRole, Group, OwnerUpdatedEvent};
 use crate::utils::get_asset_resource_seed;
 use crate::{constants::CPI_AUTHORITY_SEED, state::State};
 use crate::{Attribute, Attributes, Blob, NewAddressParams};
-use account_compression::{program::AccountCompression, RegisteredProgram};
 use anchor_lang::{prelude::*, Discriminator};
+use borsh::BorshSerialize;
 use light_hasher::{DataHasher, Poseidon};
-use light_sdk::traits::*;
+use light_sdk::light_system_accounts;
 use light_sdk::verify::{invoke_cpi, setup_cpi_accounts};
-use light_sdk::{light_accounts, LightTraits};
+use light_sdk::LightTraits;
 use light_system_program::InstructionDataInvokeCpi;
 use light_system_program::{
     invoke::processor::CompressedProof,
-    invoke_cpi::account::CpiContextAccount,
-    program::LightSystemProgram,
     sdk::{
         address::derive_address,
         compressed_account::{CompressedAccount, CompressedAccountData},
@@ -32,6 +30,7 @@ pub fn create_asset<'info>(
     blob_params: Option<BlobParams>,
     attributes_params: Option<AttributesParams>,
 ) -> Result<()> {
+    msg!("ENryt");
     if let Some(group) = &mut ctx.accounts.group {
         let group_authority_or_delegate = ctx
             .accounts
@@ -72,7 +71,6 @@ pub fn create_asset<'info>(
         asset_id: asset_id.into(),
         owner: *ctx.accounts.recipient.key,
     });
-
     create_compressed_pdas(
         &ctx,
         proof,
@@ -195,15 +193,12 @@ fn create_compressed_pdas<'info>(
         output_compressed_accounts,
         compress_or_decompress_lamports: None,
         is_compress: false,
-        signer_seeds: signer_seeds
-            .iter()
-            .map(|x| x.to_vec())
-            .collect::<Vec<Vec<u8>>>(),
         cpi_context: None,
     };
     let mut inputs: Vec<u8> = Vec::new();
     InstructionDataInvokeCpi::serialize(&inputs_struct, &mut inputs).unwrap();
     let cpi_accounts = setup_cpi_accounts(ctx);
+    msg!("Creating compressed account");
     invoke_cpi(&ctx, cpi_accounts, inputs, &[&signer_seeds])?;
 
     // Create blob if needed
@@ -251,10 +246,6 @@ fn create_compressed_pdas<'info>(
             output_compressed_accounts: vec![blob_compressed_pda],
             compress_or_decompress_lamports: None,
             is_compress: false,
-            signer_seeds: signer_seeds
-                .iter()
-                .map(|x| x.to_vec())
-                .collect::<Vec<Vec<u8>>>(),
             cpi_context: None,
         };
         let mut inputs: Vec<u8> = Vec::new();
@@ -312,10 +303,6 @@ fn create_compressed_pdas<'info>(
             output_compressed_accounts: vec![attributes_compressed_pda],
             compress_or_decompress_lamports: None,
             is_compress: false,
-            signer_seeds: signer_seeds
-                .iter()
-                .map(|x| x.to_vec())
-                .collect::<Vec<Vec<u8>>>(),
             cpi_context: None,
         };
         let mut inputs: Vec<u8> = Vec::new();
@@ -344,7 +331,7 @@ pub struct AttributesParams {
     pub proof: CompressedProof,
 }
 
-#[light_accounts]
+#[light_system_accounts]
 #[event_cpi]
 #[derive(Accounts, LightTraits)]
 pub struct CreateAsset<'info> {

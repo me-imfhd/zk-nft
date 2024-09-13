@@ -9,7 +9,7 @@ use light_system_program::invoke::processor::CompressedProof;
 use processor::*;
 use state::*;
 
-declare_id!("zkNFTi24GW95YYfM8jNM2tDDPmDnDm7EQuze8jJ66sn");
+declare_id!("BfFErdDfWHyr1q5n9EBiw6SC11wNJ8dzMgzASKic6XT2");
 
 #[program]
 pub mod zk_nft {
