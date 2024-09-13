@@ -5,14 +5,14 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-zk_nft = "BLZydyzZnS8EwDRtB9LkAJDQQqJsmatPHTzBw5C6Wdei"
+zk_nft = "BfFErdDfWHyr1q5n9EBiw6SC11wNJ8dzMgzASKic6XT2"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
 cluster = "Localnet"
-wallet = "/Users/nelson/.config/solana/id.json"
+wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "pnpm ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

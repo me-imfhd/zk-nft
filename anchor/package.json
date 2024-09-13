@@ -8,20 +8,15 @@
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "airdrop:local": "solana airdrop 1000 CuKKajwy7Md7141rgyjKee98YrkkNf2z994o6vCJysEr -u http://localhost:8899",
-    "airdrop:testnet": "solana airdrop 1000 CuKKajwy7Md7141rgyjKee98YrkkNf2z994o6vCJysEr -u https://zk-testnet.helius.dev:8899",
-    "deploy:local": "anchor deploy --program-name zk_nft --provider.cluster http://localhost:8899  --program-keypair target/deploy/program-keypair.json  --provider.wallet target/deploy/authority-keypair.json",
-    "test:local": "anchor test --provider.cluster http://localhost:8899 --skip-deploy --skip-local-validator --skip-build --provider.wallet target/deploy/authority-keypair.json",
-    "deploy:testnet": "anchor deploy --program-name zk_nft --provider.cluster https://zk-testnet.helius.dev:8899  --program-keypair target/deploy/program-keypair.json  --provider.wallet target/deploy/authority-keypair.json",
-    "test:testnet": "anchor test --provider.cluster https://zk-testnet.helius.dev:8899 --skip-deploy --skip-local-validator --skip-build --provider.wallet target/deploy/authority-keypair.json",
-    "close-buffers": "solana program close --buffers -u https://zk-testnet.helius.dev:8899 -k target/deploy/authority-keypair.json"
+    "deploy:local": "anchor deploy --program-name zk_nft --provider.cluster http://localhost:8899  --program-keypair target/deploy/zk_nft-keypair.json",
+    "test:local": "anchor test --provider.cluster http://localhost:8899 --skip-deploy --skip-local-validator --skip-build"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
     "@solana/web3.js": "^1.94.0"
   },
   "devDependencies": {
-    "@lightprotocol/stateless.js": "^0.4.4",
+    "@lightprotocol/stateless.js": "0.11.0",
     "@noble/hashes": "^1.4.0",
     "@types/bn.js": "^5.1.0",
     "@types/chai": "^4.3.0",
